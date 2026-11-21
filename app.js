@@ -18,7 +18,7 @@
  const lines=s=>s.split('\n').map(v=>`<span>${escape(v)}</span>`).join('');
  const field=(surface='ink',kind='symbol')=>`<canvas class="signal-canvas" data-surface="${surface}" data-kind="${kind}" tabindex="0" role="button" aria-label="${extras[lang].logoAction}"></canvas>`;
  function header(t,x){const active=page==='work'?0:page==='about'?1:2;return `<a class="skip" href="#main">${t.skip}</a><header id="top"><a class="brand" href="index.html" aria-label="KIYOTO" translate="no">${symbol}<span class="brand-art" aria-hidden="true"></span></a><nav aria-label="${tr('Main navigation','ناوبری اصلی','التنقل الرئيسي')}">${t.nav.map((label,i)=>`<a href="${files[i]}"${active===i?' aria-current="page"':''}>${label}</a>`).join('')}</nav><div class="tools"><button data-language aria-label="Language / زبان / اللغة">FA / EN / AR</button><button data-pause class="pause" aria-pressed="${paused}" aria-label="${paused?x.play:x.pause}">${paused?'▶':'Ⅱ'}</button></div></header>`;}
- function work(x){return `<section class="masthead"><div class="masthead-note"><span>${tr('Independent creative team','تیم خلاق مستقل','فريق إبداعي مستقل')}</span><span>${tr('Based in curiosity. Working everywhere.','با کنجکاوی، از هر جا.','ننطلق من الفضول، ونعمل في كل مكان.')}</span></div><h1 class="giant-word" aria-label="KIYOTO" translate="no" dir="ltr"><span class="brand-art" aria-hidden="true"></span></h1><div class="masthead-foot"><span>${tr('Identity. Image. Imagination.','هویت. تصویر. خیال.','هوية. صورة. خيال.')}</span><a href="#collection">${x.begin} <i aria-hidden="true">↓</i></a></div></section><section class="signal-plate"><div class="plate-copy"><h2>${tr('Less noise.<br>More art.','هیاهوی کمتر.<br>هنر بیشتر.','ضجيج أقل.<br>فن أكثر.')}</h2><p>${lines(x.studio)}</p></div>${field()}<div class="plate-registration" aria-hidden="true"><span>+</span><span>+</span></div></section><section class="collection section" id="collection"><div class="section-intro"><h2>${x.workTitle}</h2><p>${x.workIntro}</p></div><div class="collection-controls"><div class="group-tabs" role="group" aria-label="${x.index}"><button data-group="all" class="active" aria-pressed="true">${x.all}</button>${groups.map(g=>`<button data-group="${g.id}" aria-pressed="false">${g[lang]}</button>`).join('')}</div><div class="specialism"><label for="specialism">${x.search}</label><select id="specialism"><option value="all">${x.all}</option>${groups.map(g=>`<optgroup label="${g[lang]}">${g.items.map(d=>`<option value="${d.id}">${d[lang]}</option>`).join('')}</optgroup>`).join('')}</select><span class="result-count" role="status" aria-live="polite"></span></div></div><div class="contact-sheet">${window.KIYOTO_RENDER_WORK ? window.KIYOTO_RENDER_WORK(lang,groups,x) : groups.flatMap(g=>g.items.flatMap(d=>[1,2].map(n=>`<article class="work-space" data-category="${g.id}" data-discipline="${d.id}"><div class="empty-frame" role="img" aria-label="${d[lang]} — ${x.blank} ${n}"><span class="frame-cross" aria-hidden="true">+</span><span class="frame-label">${x.slot}</span><span class="frame-number" dir="ltr">0${n}</span><i class="corner a" aria-hidden="true"></i><i class="corner b" aria-hidden="true"></i></div><div class="work-caption"><h3>${d[lang]}</h3><span>${g[lang]}</span></div></article>`))).join('')}</div><p class="empty-message" hidden>${x.noResults}</p></section><section class="studio-note section"><span class="small-label">${x.story}</span><h2>${lines(x.thread)}</h2><p>${x.threadBody}</p><a class="text-link" href="about.html">${x.team} <i aria-hidden="true">↗</i></a></section>`;}
+ function work(x){return `<section class="masthead"><div class="masthead-note"><span>${tr('Independent creative team','تیم خلاق مستقل','فريق إبداعي مستقل')}</span><span>${tr('Based in curiosity. Working everywhere.','با کنجکاوی، از هر جا.','ننطلق من الفضول، ونعمل في كل مكان.')}</span></div><h1 class="giant-word" aria-label="KIYOTO" translate="no" dir="ltr"><span class="brand-art" aria-hidden="true"></span></h1><div class="masthead-foot"><span>${tr('Identity. Image. Imagination.','هویت. تصویر. خیال.','هوية. صورة. خيال.')}</span><a href="#collection">${x.begin} <i aria-hidden="true">↓</i></a></div></section><section class="signal-plate"><div class="plate-copy"><h2>${tr('Less noise.<br>More art.','هیاهوی کمتر.<br>هنر بیشتر.','ضجيج أقل.<br>فن أكثر.')}</h2><p>${lines(x.studio)}</p></div>${field()}<div class="plate-registration" aria-hidden="true"><span>+</span><span>+</span></div></section><section class="collection section" id="collection"><div class="section-intro"><h2>${x.workTitle}</h2><p>${x.workIntro}</p></div><div class="collection-controls"><div class="group-tabs" role="group" aria-label="${x.index}"><button data-group="all" class="active" aria-pressed="true">${x.all}</button>${groups.map(g=>`<button data-group="${g.id}" aria-pressed="false">${g[lang]}</button>`).join('')}</div><div class="subject-filters" hidden></div><span class="result-count" role="status" aria-live="polite"></span></div><div class="contact-sheet">${window.KIYOTO_RENDER_WORK ? window.KIYOTO_RENDER_WORK(lang,groups,x) : groups.flatMap(g=>g.items.flatMap(d=>[1,2].map(n=>`<article class="work-space" data-category="${g.id}" data-discipline="${d.id}"><div class="empty-frame" role="img" aria-label="${d[lang]} — ${x.blank} ${n}"><span class="frame-cross" aria-hidden="true">+</span><span class="frame-label">${x.slot}</span><span class="frame-number" dir="ltr">0${n}</span><i class="corner a" aria-hidden="true"></i><i class="corner b" aria-hidden="true"></i></div><div class="work-caption"><h3>${d[lang]}</h3><span>${g[lang]}</span></div></article>`))).join('')}</div><p class="empty-message" hidden>${x.noResults}</p></section><section class="studio-note section"><span class="small-label">${x.story}</span><h2>${lines(x.thread)}</h2><p>${x.threadBody}</p><a class="text-link" href="about.html">${x.team} <i aria-hidden="true">↗</i></a></section>`;}
  function about(t,x){
   const members = window.KIYOTO_MEMBERS || [
    { id: 'erfan', image: 'erfan.jpg', width: 800, height: 1000, instagram: 'erfansharafn' },
@@ -45,11 +45,47 @@
   dialog.addEventListener('close',()=>{entered=true;document.dispatchEvent(new Event('kiyoto:gate'));});
   document.querySelector('[data-pause]').onclick=()=>{paused=!paused;save('kiyoto-v2-motion',paused?'paused':'playing');syncMotion();};
   document.querySelectorAll('a[href]').forEach(a=>{if(!files.includes(a.getAttribute('href')))return;a.addEventListener('click',e=>{if(e.defaultPrevented||e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey||paused)return;e.preventDefault();if(window.gsap)gsap.to('#app>header,#app>main',{opacity:0,filter:'blur(10px)',duration:.24,onComplete:()=>location.href=a.href});else location.href=a.href;});});
-  const select=document.getElementById('specialism');if(select){const params=new URL(location.href).searchParams;let group=params.get('group')||'all';if(!groups.some(g=>g.id===group))group='all';const requested=params.get('discipline');if([...select.options].some(o=>o.value===requested))select.value=requested;
-   const cards=[...document.querySelectorAll('.work-space')],buttons=[...document.querySelectorAll('[data-group]')];
-   const update=(animate=false)=>{if(window.Flip)Flip.killFlipsOf(cards);const state=animate&&!paused&&window.Flip?Flip.getState(cards.filter(c=>!c.hidden)):null;const d=select.value;if(d!=='all')group='all';cards.forEach(c=>c.hidden=(group!=='all'&&c.dataset.category!==group)||(d!=='all'&&c.dataset.discipline!==d));buttons.forEach(b=>{const active=b.dataset.group===group;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});const shown=cards.filter(c=>!c.hidden);document.querySelector('.result-count').textContent=`${shown.length} ${x.count}`;document.querySelector('.empty-message').hidden=shown.length>0;try{const url=new URL(location.href);group==='all'?url.searchParams.delete('group'):url.searchParams.set('group',group);d==='all'?url.searchParams.delete('discipline'):url.searchParams.set('discipline',d);history.replaceState(null,'',url);}catch{}if(state){Flip.from(state,{duration:.6,ease:'power3.inOut',absoluteOnLeave:true,prune:true,onEnter:els=>gsap.fromTo(els,{autoAlpha:0,y:16},{autoAlpha:1,y:0,duration:.4,clearProps:'opacity,visibility,transform'})});}window.ScrollTrigger?.refresh();};
-   buttons.forEach(b=>b.onclick=()=>{group=b.dataset.group;select.value='all';update(true);});select.onchange=()=>update(true);update();
+  const filters = document.querySelector('.subject-filters');
+  if (filters) {
+   const params = new URL(location.href).searchParams;
+   let group = params.get('group') || 'all', subject = params.get('discipline') || '';
+   if (!groups.some(g => g.id === group)) group = 'all';
+   const cards = [...document.querySelectorAll('.work-space')];
+   const inBranch = (id, parent, items) => {
+    const seen = new Set();
+    while (id && !seen.has(id)) { if (id === parent) return true; seen.add(id); id = items.find(n => n.id === id)?.parent; }
+    return false;
+   };
+   const update = () => {
+    const category = groups.find(g => g.id === group);
+    if (!category?.items.some(n => n.id === subject)) subject = '';
+    document.querySelectorAll('[data-group]').forEach(b => { b.classList.toggle('active', b.dataset.group === group); b.setAttribute('aria-pressed', String(b.dataset.group === group)); });
+    filters.innerHTML = '';
+    if (category) {
+     let parent = '', depth = 0;
+     const ancestry = []; let node = category.items.find(n => n.id === subject);
+     while (node && ancestry.length < 50) { ancestry.unshift(node.id); node = category.items.find(n => n.id === node.parent); }
+     do {
+      const children = category.items.filter(n => (n.parent || '') === parent);
+      if (!children.length) break;
+      const tier = document.createElement('div'); tier.className = 'subject-filter-tier'; tier.setAttribute('role','group'); tier.setAttribute('aria-label', category[lang]);
+      tier.innerHTML = `<button data-subject-filter="${parent}" aria-pressed="${subject === parent}" class="${subject === parent ? 'active' : ''}">${x.all}</button>` + children.map(n => `<button data-subject-filter="${n.id}" class="${ancestry.includes(n.id) ? 'active' : ''}" aria-pressed="${ancestry.includes(n.id)}">${escape(n[lang] || n.en)}</button>`).join('');
+      filters.append(tier); parent = ancestry[depth++];
+     } while (parent && depth < 50);
+    }
+    filters.hidden = !category;
+    filters.querySelectorAll('[data-subject-filter]').forEach(b => b.onclick = () => { subject = b.dataset.subjectFilter; update(); filters.querySelector(`[data-subject-filter="${subject}"]`)?.focus({preventScroll:true}); });
+    cards.forEach(c => c.hidden = group !== 'all' && (c.dataset.category !== group || (subject && !inBranch(c.dataset.discipline, subject, category.items))));
+    const count = cards.filter(c => !c.hidden).length;
+    document.querySelector('.result-count').textContent = `${count} ${x.count}`;
+    document.querySelector('.empty-message').hidden = count > 0;
+    const url = new URL(location.href); group === 'all' ? url.searchParams.delete('group') : url.searchParams.set('group', group); subject ? url.searchParams.set('discipline', subject) : url.searchParams.delete('discipline'); history.replaceState(null,'',url);
+    window.ScrollTrigger?.refresh();
+   };
+   document.querySelectorAll('[data-group]').forEach(b => b.onclick = () => { group = b.dataset.group; subject = ''; update(); });
+   update();
   }
+
   document.querySelectorAll('button[data-stage]').forEach(b=>b.onclick=()=>{document.getElementById('stage-'+b.dataset.stage).scrollIntoView({behavior:paused?'instant':'smooth',block:'center'});});
  }
  function syncMotion(){document.documentElement.classList.toggle('motion-off',paused);const b=document.querySelector('[data-pause]');b.textContent=paused?'▶':'Ⅱ';b.setAttribute('aria-pressed',String(paused));b.setAttribute('aria-label',paused?extras[lang].play:extras[lang].pause);document.dispatchEvent(new Event('kiyoto:motion'));}

@@ -324,35 +324,10 @@
   },
   "groups": [
     {
-      "id": "identity",
-      "en": "Brand & Identity",
-      "fa": "برند و هویت",
-      "items": [
-        {
-          "id": "brand-identity",
-          "en": "Brand Identity",
-          "fa": "هویت برند",
-          "ar": "هوية العلامة"
-        },
-        {
-          "id": "art-direction",
-          "en": "Art Direction",
-          "fa": "آرت‌دایرکشن",
-          "ar": "الإخراج الفني"
-        },
-        {
-          "id": "advertising",
-          "en": "Advertising & Campaigns",
-          "fa": "تبلیغات و کمپین‌ها",
-          "ar": "الإعلانات والحملات"
-        }
-      ],
-      "ar": "العلامة والهوية"
-    },
-    {
-      "id": "photography",
-      "en": "Photography",
-      "fa": "عکاسی",
+      "id": "photography-film",
+      "en": "Photography & Film",
+      "fa": "عکاسی و فیلم",
+      "ar": "التصوير والأفلام",
       "items": [
         {
           "id": "fashion",
@@ -407,15 +382,7 @@
           "en": "Editorial Photography",
           "fa": "عکاسی ادیتوریال",
           "ar": "التصوير التحريري"
-        }
-      ],
-      "ar": "التصوير"
-    },
-    {
-      "id": "film",
-      "en": "Film & Motion",
-      "fa": "فیلم و موشن",
-      "items": [
+        },
         {
           "id": "cinematography",
           "en": "Cinematography",
@@ -440,14 +407,32 @@
           "fa": "موزیک‌ویدیو",
           "ar": "الفيديو الموسيقي"
         }
-      ],
-      "ar": "الفيلم والحركة"
+      ]
     },
     {
       "id": "design",
       "en": "Design",
       "fa": "طراحی",
+      "ar": "التصميم",
       "items": [
+        {
+          "id": "brand-identity",
+          "en": "Brand Identity",
+          "fa": "هویت برند",
+          "ar": "هوية العلامة"
+        },
+        {
+          "id": "art-direction",
+          "en": "Art Direction",
+          "fa": "آرت‌دایرکشن",
+          "ar": "الإخراج الفني"
+        },
+        {
+          "id": "advertising",
+          "en": "Advertising & Campaigns",
+          "fa": "تبلیغات و کمپین‌ها",
+          "ar": "الإعلانات والحملات"
+        },
         {
           "id": "graphic",
           "en": "Graphic Design",
@@ -483,15 +468,7 @@
           "en": "Cover & Artwork Design",
           "fa": "طراحی کاور و آرت‌ورک",
           "ar": "تصميم الأغلفة والأعمال الفنية"
-        }
-      ],
-      "ar": "التصميم"
-    },
-    {
-      "id": "production",
-      "en": "Creative Production",
-      "fa": "تولید خلاق",
-      "items": [
+        },
         {
           "id": "creative-production",
           "en": "Creative Production",
@@ -516,11 +493,15 @@
           "fa": "تولید محتوای شبکه‌های اجتماعی",
           "ar": "إنتاج محتوى التواصل الاجتماعي"
         }
-      ],
-      "ar": "الإنتاج الإبداعي"
+      ]
     }
   ],
   "settings": {
-    "logo": ""
+    "logo": "",
+    "socialTitle": "KIYOTO Creative Team",
+    "socialDescription": "An independent creative team. Photography, film, brand identity and design.",
+    "favicon": "",
+    "icon": "",
+    "socialImage": ""
   }
 }

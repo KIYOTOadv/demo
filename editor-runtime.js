@@ -2,6 +2,8 @@
   'use strict';
   const data = window.KIYOTO_EDITOR_DATA;
   if (!data) return;
+  const ordered = (g, parent = '', depth = 0) => depth > 50 ? [] : g.items.filter(n=>(n.parent||'')===parent).flatMap(n=>[n,...ordered(g,n.id,depth+1)]);
+  window.KIYOTO_GROUPS = data.groups.map(g=>({...g,items:ordered(g)}));
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const text = (value, lang) => value?.[lang] || value?.en || '';
   const safeCopy = value => Array.isArray(value) ? value.map(safeCopy) : typeof value === 'string' ? esc(value) : value;
