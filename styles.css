@@ -23,3 +23,11 @@ header{min-height:90px;display:grid;grid-template-columns:1fr auto 1fr;gap:40px;
 .person-copy p+p{margin-top:1.2em}
 #pooya{scroll-margin-top:30px}
 #pooya img{filter:grayscale(1);object-position:50% 28%}
+
+/* Official KIYOTO artwork: preserve the supplied letterforms and proportions. */
+:root{--symbol-mask:url("assets/brand-symbol.png");--full-mask:url("assets/brand-lockup.png")}
+.brand-art{display:block;flex-shrink:0;background:currentColor;mask:url("assets/brand-wordmark.png") center/contain no-repeat;-webkit-mask:url("assets/brand-wordmark.png") center/contain no-repeat;aspect-ratio:1786/690}
+.brand{gap:11px;letter-spacing:0}.brand>.brand-art{width:136px;height:auto}.brand .symbol{width:22px;height:32px}
+.giant-word,html[dir=rtl] .giant-word{display:block;font-size:inherit;line-height:1;letter-spacing:0;margin:0;padding:22px 0 20px;width:100%}.giant-word>.brand-art{width:100%;height:auto}
+.footer-brand{display:flex;align-items:center;justify-content:space-between;gap:5vw;font-size:inherit;letter-spacing:0}.footer-brand>.brand-art{width:75%;height:auto}.footer-brand>.symbol{width:12%;height:auto;aspect-ratio:2449/3278}
+@media(max-width:540px){.brand>.brand-art{width:112px}.brand .symbol{width:19px;height:28px}.giant-word,html[dir=rtl] .giant-word{padding-block:28px}.footer-brand>.brand-art{width:78%}}
