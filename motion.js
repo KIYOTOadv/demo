@@ -12,20 +12,25 @@ window.KiyotoMotion={install(isPaused){
  function scene(canvas,draw,{gate=false}={}){
   if(!canvas)return;const ctx=canvas.getContext('2d');if(!ctx)return;
   let width=1,height=1,frame=0,raf=0,time=0,last=0,visible=gate;
-  const pointer={x:.5,y:.5,active:false,pulse:0};
+  const pointer={x:.5,y:.5,active:false,pulse:0,trail:[]};let stroke=null;
   const allowed=()=>alive&&!quiet()&&(gate?gateOpen():visible&&!gateOpen());
-  const paint=ts=>{const dt=Math.min((ts-last)||16,35);last=ts;if(allowed()){time+=dt*.001;pointer.pulse*=Math.exp(-dt*.002);}draw(ctx,width,height,time,pointer);canvas.dataset.frames=String(++frame);};
+  const paint=ts=>{const dt=Math.min((ts-last)||16,35);last=ts;if(allowed()){time+=dt*.001;pointer.pulse*=Math.exp(-dt*.002);pointer.trail.forEach(sample=>sample.life*=Math.exp(-dt*.003));pointer.trail=pointer.trail.filter(sample=>sample.life>.025);}draw(ctx,width,height,time,pointer);canvas.dataset.frames=String(++frame);};
   const loop=ts=>{raf=0;if(!allowed())return;paint(ts);raf=requestAnimationFrame(loop);};
   const sync=()=>{if(allowed()&&!raf){last=0;raf=requestAnimationFrame(loop);}else if(!allowed()){cancelAnimationFrame(raf);raf=0;}};
   const resize=()=>{const r=canvas.getBoundingClientRect();if(!r.width||!r.height)return;width=r.width;height=r.height;const d=Math.min(devicePixelRatio||1,1.5);canvas.width=Math.round(width*d);canvas.height=Math.round(height*d);ctx.setTransform(d,0,0,d,0,0);paint(0);sync();};
   const observer=new IntersectionObserver(e=>{visible=e[0].isIntersecting;sync();},{rootMargin:'80px'});observer.observe(canvas);
-  const move=e=>{const r=canvas.getBoundingClientRect();pointer.x=clamp((e.clientX-r.left)/r.width);pointer.y=clamp((e.clientY-r.top)/r.height);pointer.active=true;};
+  const move=e=>{if(e.pointerType==='touch'||isPaused())return;if(e.pointerType==='pen'){sweep(e);return;}const r=canvas.getBoundingClientRect();pointer.x=clamp((e.clientX-r.left)/r.width);pointer.y=clamp((e.clientY-r.top)/r.height);pointer.active=true;};
   const leave=()=>pointer.active=false,activate=()=>{if(!isPaused())pointer.pulse=1;};
+  const startStroke=e=>{if(isPaused())return;stroke={startX:e.clientX,startY:e.clientY,lastX:e.clientX,lastY:e.clientY,moved:false};pointer.active=false;};
+  const sweep=e=>{if(!stroke||isPaused())return;const dx=e.clientX-stroke.lastX,dy=e.clientY-stroke.lastY;if(!stroke.moved&&Math.hypot(e.clientX-stroke.startX,e.clientY-stroke.startY)<8)return;stroke.moved=true;if(Math.hypot(dx,dy)<2)return;const r=canvas.getBoundingClientRect();pointer.trail.push({x:clamp((e.clientX-r.left)/r.width),y:clamp((e.clientY-r.top)/r.height),vx:Math.max(-1,Math.min(1,dx/32)),vy:Math.max(-1,Math.min(1,dy/32)),life:1});pointer.trail=pointer.trail.slice(-10);stroke.lastX=e.clientX;stroke.lastY=e.clientY;};
+  const down=e=>{if(e.pointerType==='touch')return;if(e.pointerType==='pen')startStroke(e);else activate();};
+  const finish=()=>{stroke=null;pointer.active=false;};const release=e=>{if(e.pointerType!=='touch')finish();};
+  const touchStart=e=>{if(e.touches.length===1)startStroke(e.touches[0]);else finish();},touchMove=e=>{if(e.touches.length===1)sweep(e.touches[0]);else finish();};
   const key=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();activate();}};
-  canvas.addEventListener('pointermove',move,{passive:true});canvas.addEventListener('pointerleave',leave);canvas.addEventListener('pointerdown',activate);canvas.addEventListener('keydown',key);
+  canvas.addEventListener('pointermove',move,{passive:true});canvas.addEventListener('pointerleave',leave);canvas.addEventListener('pointerdown',down);canvas.addEventListener('pointerup',release);canvas.addEventListener('pointercancel',release);canvas.addEventListener('touchstart',touchStart,{passive:true});canvas.addEventListener('touchmove',touchMove,{passive:true});canvas.addEventListener('touchend',finish,{passive:true});canvas.addEventListener('touchcancel',finish,{passive:true});canvas.addEventListener('keydown',key);
   addEventListener('resize',resize);document.addEventListener('visibilitychange',sync);document.addEventListener('kiyoto:motion',sync);const gateChange=()=>{resize();sync();};document.addEventListener('kiyoto:gate',gateChange);
   loops.push(sync);resize();
-  clean.push(()=>{cancelAnimationFrame(raf);observer.disconnect();removeEventListener('resize',resize);document.removeEventListener('visibilitychange',sync);document.removeEventListener('kiyoto:motion',sync);document.removeEventListener('kiyoto:gate',gateChange);canvas.removeEventListener('pointermove',move);canvas.removeEventListener('pointerleave',leave);canvas.removeEventListener('pointerdown',activate);canvas.removeEventListener('keydown',key);});
+  clean.push(()=>{cancelAnimationFrame(raf);observer.disconnect();removeEventListener('resize',resize);document.removeEventListener('visibilitychange',sync);document.removeEventListener('kiyoto:motion',sync);document.removeEventListener('kiyoto:gate',gateChange);canvas.removeEventListener('pointermove',move);canvas.removeEventListener('pointerleave',leave);canvas.removeEventListener('pointerdown',down);canvas.removeEventListener('pointerup',release);canvas.removeEventListener('pointercancel',release);canvas.removeEventListener('touchstart',touchStart);canvas.removeEventListener('touchmove',touchMove);canvas.removeEventListener('touchend',finish);canvas.removeEventListener('touchcancel',finish);canvas.removeEventListener('keydown',key);});
  }
  // Thin signal fragments sampled from the real mark. No floating dot texture.
  const points=window.KIYOTO_LOGO_POINTS||[];
@@ -43,6 +48,8 @@ window.KiyotoMotion={install(isPaused){
      const [sx,sy]=points[i];let x=(sx-125)/250*size,y=(sy-137.5)/275*size;
      const flow=Math.sin(y/size*11+t*.7)*3+Math.sin(i*.17+t*.4)*1.2;
      const distance=Math.hypot(x-px,y-py),force=p.active?clamp(1-distance/(size*.45)):0;
+     let swipeX=0,swipeY=0;for(const sample of p.trail){const dx=x-(sample.x-.5)*w,dy=y-(sample.y-.5)*h,d=Math.hypot(dx,dy),brush=clamp(1-d/(size*.23))*sample.life;swipeX+=(dx/(d||1)+sample.vx*.8)*brush*size*.12;swipeY+=(dy/(d||1)+sample.vy*.8)*brush*size*.12;}
+     x+=Math.max(-size*.26,Math.min(size*.26,swipeX));y+=Math.max(-size*.26,Math.min(size*.26,swipeY));
      const scatter=p.pulse*(30+(i%29)*3);x+=flow+Math.sin(i*.81)*scatter+(x-px)*force*.12;y+=Math.cos(i*.21+t*.55)*1.6+Math.cos(i*.67)*scatter+(y-py)*force*.12;
      if(frequency)x+=Math.sin(y/size*8+t*.4)*size*.025;
      const length=2+(i%4)*.7;ctx.moveTo(cx+x,cy+y);ctx.lineTo(cx+x+length,cy+y-.5);
@@ -69,7 +76,7 @@ window.KiyotoMotion={install(isPaused){
  if(gs){
   const context=gs.context(()=>{
    intro=gs.timeline({paused:true,defaults:{ease:'power3.out'}});
-   if(document.querySelector('.giant-word'))intro.from('.giant-word>span',{yPercent:110,rotation:5,duration:1.15,stagger:.055}).from('.masthead-foot',{y:15,autoAlpha:0,duration:.55},'-.5');
+   if(document.querySelector('.giant-word'))intro.from('.logo-letter',{autoAlpha:0,filter:'blur(5px)',duration:.65,stagger:.09,clearProps:'filter'}).from('.logo-tagline',{autoAlpha:0,filter:'blur(3px)',duration:.65,clearProps:'filter'},.35).from('.masthead-foot',{autoAlpha:0,duration:.55},'-.3');
    else intro.from('.editorial-hero h1>span',{y:40,autoAlpha:0,duration:.9,stagger:.1});
    // Related shapes move as a composition, not a collection of unrelated reveals.
    document.querySelectorAll('.principle-figure').forEach((el,i)=>{const targets=el.querySelectorAll('i');const tl=gs.timeline({repeat:-1,yoyo:true,paused:true,defaults:{duration:3.4,ease:'sine.inOut'}});if(i===0)tl.to(targets[0],{scaleX:.58,rotation:20},0).to(targets[1],{x:45,scale:.65},0);else if(i===1)tl.to(targets,{rotation:j=>j?-95:95,scale:j=>j?1.1:.6,stagger:.1},0);else tl.to(targets,{x:j=>j?-48:48,scaleY:.68,stagger:.1},0);controllers.push({el,tl,visible:false});});
@@ -82,7 +89,8 @@ window.KiyotoMotion={install(isPaused){
      const paper1=board.querySelector('.p-one'),paper2=board.querySelector('.p-two'),paper3=board.querySelector('.p-three'),focus=board.querySelector('.proof-focus');
      const scenes=[{r:[-14,13,-2],x:[-6,25,5],y:[-3,3,13],focus:.95},{r:[-4,4,0],x:[-20,20,0],y:[0,0,0],focus:1.06},{r:[0,0,0],x:[-5,5,0],y:[0,0,0],focus:.78},{r:[-7,7,0],x:[-10,12,8],y:[-4,0,10],focus:.96}];
      const selectStage=i=>{const config=scenes[i];[paper1,paper2,paper3].forEach((el,j)=>gs.to(el,{rotation:config.r[j],xPercent:config.x[j],yPercent:config.y[j],duration:isPaused()?0:.85,ease:'power3.inOut',overwrite:true}));gs.to(focus,{scale:config.focus,duration:isPaused()?0:.85,ease:'power3.inOut',overwrite:true});document.querySelector('.board-stage').textContent=`0${i+1} / 04`;document.querySelectorAll('button[data-stage]').forEach((b,j)=>b.setAttribute('aria-pressed',String(i===j)));board.dataset.stage=i;};
-     document.querySelectorAll('.stage').forEach((el,i)=>{ST.create({trigger:el,start:'top center',end:'bottom center',onEnter:()=>selectStage(i),onEnterBack:()=>selectStage(i)});});
+     const stageLine=()=>matchMedia('(max-width:900px)').matches?'55%':'center';
+     document.querySelectorAll('.stage').forEach((el,i)=>{ST.create({trigger:el,start:()=>'top '+stageLine(),end:()=>'bottom '+stageLine(),invalidateOnRefresh:true,onEnter:()=>selectStage(i),onEnterBack:()=>selectStage(i)});});
      document.querySelectorAll('button[data-stage]').forEach(b=>b.addEventListener('click',()=>selectStage(Number(b.dataset.stage))));selectStage(0);
     }
    }

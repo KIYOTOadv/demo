@@ -33,3 +33,18 @@ header{min-height:90px;display:grid;grid-template-columns:1fr auto 1fr;gap:40px;
 @media(max-width:540px){.brand>.brand-art{width:112px}.brand .symbol{width:19px;height:28px}.giant-word,html[dir=rtl] .giant-word{padding-block:28px}.footer-brand>.brand-art{width:78%}}
 
 .subject-filters{width:100%;margin-top:22px}.subject-filter-tier{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:12px;padding-top:12px;border-top:1px solid var(--rule)}.subject-filter-tier button{padding:10px 16px;border:1px solid var(--rule);border-radius:25px;font-size:14px;line-height:1.5}.subject-filter-tier button.active{background:var(--ink);color:var(--paper);border-color:var(--ink)}.subject-filter-tier button:hover{border-color:var(--wine)}.collection-controls{flex-wrap:wrap}.collection-controls>.result-count{display:block;margin-top:15px}
+
+/* On phones the process study sits quietly behind the essays, with no duplicate navigation. */
+@media(max-width:900px){
+ .practice-section{display:grid;grid-template-columns:minmax(0,1fr);position:relative;isolation:isolate;gap:0}
+ .proof-column{grid-area:1/1;position:relative;top:auto;z-index:0;align-self:stretch;min-width:0;padding:0;margin:0;border:0;background:transparent;pointer-events:none;user-select:none}
+ .proof-sticky{position:sticky;top:calc((100svh - min(90vw,440px))/2);width:100%;height:min(90vw,440px);max-width:none;margin:0}
+ .proof-board{width:min(100%,440px);height:auto;aspect-ratio:1;margin-inline:auto;opacity:.14;background:transparent;filter:saturate(.45);mask-image:radial-gradient(ellipse,#000 28%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse,#000 28%,transparent 75%)}
+ .proof-grid,.proof-caption,.stage-buttons{display:none}
+ .stage-essays{grid-area:1/1;position:relative;z-index:1;min-width:0}
+ .stage{min-height:85svh;padding:64px 0;scroll-margin-top:40px}
+ .stage h2{font-size:clamp(34px,8vw,52px);max-width:16ch}
+ .stage h2,.stage p{text-shadow:0 1px 5px var(--paper),0 -1px 5px var(--paper)}
+ .stage p{max-width:48ch}
+ html[dir=rtl] .stage h2{font-size:clamp(30px,7vw,42px)}
+}
