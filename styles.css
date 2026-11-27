@@ -48,3 +48,6 @@ header{min-height:90px;display:grid;grid-template-columns:1fr auto 1fr;gap:40px;
  .stage p{max-width:48ch}
  html[dir=rtl] .stage h2{font-size:clamp(30px,7vw,42px)}
 }
+
+/* Two-language navigation; a single welcome action. */
+.tools [data-language][lang=fa]{font-family:Persian,Arial,sans-serif;font-size:14px}.intro-gate .gate-options h2{font-size:clamp(25px,2.6vw,38px);line-height:1.25;margin-bottom:26px}.intro-gate .gate-enter{display:inline-flex;align-items:center;justify-content:center;gap:36px;min-width:240px;min-height:60px;padding:14px 28px;background:var(--paper);color:var(--ink);border:1px solid var(--paper);font-size:22px;transition:background .25s,color .25s}.intro-gate .gate-enter:hover{background:var(--ink);color:var(--paper);border-color:var(--ink)}.intro-gate .gate-enter:focus-visible{outline-color:var(--ink)}html[lang=fa] .intro-gate .gate-options h2{font-family:Persian,Arial,sans-serif;letter-spacing:0;line-height:1.8}.intro-gate .gate-enter span{font-size:24px}@media(max-height:650px){.intro-gate .gate-options h2{font-size:25px;margin-bottom:18px}.intro-gate .gate-enter{min-height:52px;font-size:20px}}

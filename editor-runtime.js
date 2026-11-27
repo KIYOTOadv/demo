@@ -7,7 +7,7 @@
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const text = (value, lang) => value?.[lang] || value?.en || '';
   const safeCopy = value => Array.isArray(value) ? value.map(safeCopy) : typeof value === 'string' ? esc(value) : value;
-  for (const lang of ['en', 'fa', 'ar']) {
+  for (const lang of ['en', 'fa']) {
     for (const [key, value] of Object.entries(data.content[lang])) if (Object.hasOwn(window.KIYOTO_CONTENT[lang], key)) window.KIYOTO_CONTENT[lang][key] = safeCopy(value);
     window.KIYOTO_CONTENT[lang].names = data.members.map(m => esc(m.name[lang]));
     window.KIYOTO_CONTENT[lang].roles = data.members.map(m => esc(m.role[lang]));
@@ -37,7 +37,7 @@
     const dialog = document.createElement('dialog');
     dialog.className = 'project-dialog';
     dialog.setAttribute('aria-label', title);
-    dialog.innerHTML = `<div class="project-dialog-top"><span>${esc(project.client || '')} ${esc(project.year || '')}</span><button class="project-close" aria-label="${lang === 'fa' ? 'بستن' : lang === 'ar' ? 'إغلاق' : 'Close project'}">×</button></div><h2>${esc(title)}</h2><div class="project-description">${text(project.description, lang).split('\n\n').map(p => `<p>${esc(p)}</p>`).join('')}</div><div class="project-gallery">${project.media.map(m => `<figure>${m.type === 'video' ? `<video src="${esc(m.src)}" controls playsinline preload="metadata"></video>` : `<img src="${esc(m.src)}" alt="${esc(text(m.alt, lang) || title)}" loading="lazy">`}</figure>`).join('')}</div>`;
+    dialog.innerHTML = `<div class="project-dialog-top"><span>${esc(project.client || '')} ${esc(project.year || '')}</span><button class="project-close" aria-label="${lang === 'fa' ? 'بستن' : 'Close project'}">×</button></div><h2>${esc(title)}</h2><div class="project-description">${text(project.description, lang).split('\n\n').map(p => `<p>${esc(p)}</p>`).join('')}</div><div class="project-gallery">${project.media.map(m => `<figure>${m.type === 'video' ? `<video src="${esc(m.src)}" controls playsinline preload="metadata"></video>` : `<img src="${esc(m.src)}" alt="${esc(text(m.alt, lang) || title)}" loading="lazy">`}</figure>`).join('')}</div>`;
     document.body.append(dialog);
     dialog.querySelector('.project-close').onclick = () => closeProject(dialog);
     dialog.addEventListener('cancel', event => { event.preventDefault(); closeProject(dialog); });
@@ -46,8 +46,8 @@
   // Preview parameters are only used by the local desktop preview server.
   if (['127.0.0.1', 'localhost'].includes(location.hostname)) {
     const lang = new URL(location.href).searchParams.get('previewLanguage');
-    if (['en', 'fa', 'ar'].includes(lang)) {
-      try { localStorage.setItem('kiyoto-v2-language', lang); sessionStorage.setItem('kiyoto-v2-entered', 'yes'); } catch {}
+    if (['en', 'fa'].includes(lang)) {
+      try { localStorage.setItem('kiyoto-language', lang); sessionStorage.setItem('kiyoto-entered', 'yes'); } catch {}
     }
   }
 })();

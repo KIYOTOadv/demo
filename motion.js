@@ -12,17 +12,17 @@ window.KiyotoMotion={install(isPaused){
  function scene(canvas,draw,{gate=false}={}){
   if(!canvas)return;const ctx=canvas.getContext('2d');if(!ctx)return;
   let width=1,height=1,frame=0,raf=0,time=0,last=0,visible=gate;
-  const pointer={x:.5,y:.5,active:false,pulse:0,trail:[]};let stroke=null;
+  const pointer={x:.5,y:.5,active:false,strength:0,targetX:.5,targetY:.5,pulse:0,trail:[],delta:.016};let stroke=null;
   const allowed=()=>alive&&!quiet()&&(gate?gateOpen():visible&&!gateOpen());
-  const paint=ts=>{const dt=Math.min((ts-last)||16,35);last=ts;if(allowed()){time+=dt*.001;pointer.pulse*=Math.exp(-dt*.002);pointer.trail.forEach(sample=>sample.life*=Math.exp(-dt*.003));pointer.trail=pointer.trail.filter(sample=>sample.life>.025);}draw(ctx,width,height,time,pointer);canvas.dataset.frames=String(++frame);};
+  const paint=ts=>{const dt=Math.min((ts-last)||16,35);last=ts;if(allowed()){time+=dt*.001;pointer.delta=dt*.001;const follow=1-Math.exp(-dt*.012);pointer.x+=(pointer.targetX-pointer.x)*follow;pointer.y+=(pointer.targetY-pointer.y)*follow;pointer.strength+=((pointer.active?1:0)-pointer.strength)*follow;pointer.pulse*=Math.exp(-dt*.002);pointer.trail.forEach(sample=>sample.life*=Math.exp(-dt*.003));pointer.trail=pointer.trail.filter(sample=>sample.life>.025);}draw(ctx,width,height,time,pointer);canvas.dataset.frames=String(++frame);};
   const loop=ts=>{raf=0;if(!allowed())return;paint(ts);raf=requestAnimationFrame(loop);};
   const sync=()=>{if(allowed()&&!raf){last=0;raf=requestAnimationFrame(loop);}else if(!allowed()){cancelAnimationFrame(raf);raf=0;}};
   const resize=()=>{const r=canvas.getBoundingClientRect();if(!r.width||!r.height)return;width=r.width;height=r.height;const d=Math.min(devicePixelRatio||1,1.5);canvas.width=Math.round(width*d);canvas.height=Math.round(height*d);ctx.setTransform(d,0,0,d,0,0);paint(0);sync();};
   const observer=new IntersectionObserver(e=>{visible=e[0].isIntersecting;sync();},{rootMargin:'80px'});observer.observe(canvas);
-  const move=e=>{if(e.pointerType==='touch'||isPaused())return;if(e.pointerType==='pen'){sweep(e);return;}const r=canvas.getBoundingClientRect();pointer.x=clamp((e.clientX-r.left)/r.width);pointer.y=clamp((e.clientY-r.top)/r.height);pointer.active=true;};
+  const move=e=>{if(e.pointerType==='touch'||isPaused())return;if(e.pointerType==='pen'){sweep(e);return;}const r=canvas.getBoundingClientRect();pointer.targetX=clamp((e.clientX-r.left)/r.width);pointer.targetY=clamp((e.clientY-r.top)/r.height);pointer.active=true;};
   const leave=()=>pointer.active=false,activate=()=>{if(!isPaused())pointer.pulse=1;};
   const startStroke=e=>{if(isPaused())return;stroke={startX:e.clientX,startY:e.clientY,lastX:e.clientX,lastY:e.clientY,moved:false};pointer.active=false;};
-  const sweep=e=>{if(!stroke||isPaused())return;const dx=e.clientX-stroke.lastX,dy=e.clientY-stroke.lastY;if(!stroke.moved&&Math.hypot(e.clientX-stroke.startX,e.clientY-stroke.startY)<8)return;stroke.moved=true;if(Math.hypot(dx,dy)<2)return;const r=canvas.getBoundingClientRect();pointer.trail.push({x:clamp((e.clientX-r.left)/r.width),y:clamp((e.clientY-r.top)/r.height),vx:Math.max(-1,Math.min(1,dx/32)),vy:Math.max(-1,Math.min(1,dy/32)),life:1});pointer.trail=pointer.trail.slice(-10);stroke.lastX=e.clientX;stroke.lastY=e.clientY;};
+  const sweep=e=>{if(!stroke||isPaused())return;const dx=e.clientX-stroke.lastX,dy=e.clientY-stroke.lastY;if(!stroke.moved&&Math.hypot(e.clientX-stroke.startX,e.clientY-stroke.startY)<8)return;stroke.moved=true;if(Math.hypot(dx,dy)<2)return;const r=canvas.getBoundingClientRect();pointer.trail.push({x:clamp((e.clientX-r.left)/r.width),y:clamp((e.clientY-r.top)/r.height),vx:Math.max(-1,Math.min(1,dx/32)),vy:Math.max(-1,Math.min(1,dy/32)),life:1});pointer.trail=pointer.trail.slice(-8);stroke.lastX=e.clientX;stroke.lastY=e.clientY;};
   const down=e=>{if(e.pointerType==='touch')return;if(e.pointerType==='pen')startStroke(e);else activate();};
   const finish=()=>{stroke=null;pointer.active=false;};const release=e=>{if(e.pointerType!=='touch')finish();};
   const touchStart=e=>{if(e.touches.length===1)startStroke(e.touches[0]);else finish();},touchMove=e=>{if(e.touches.length===1)sweep(e.touches[0]);else finish();};
@@ -36,10 +36,11 @@ window.KiyotoMotion={install(isPaused){
  const points=window.KIYOTO_LOGO_POINTS||[];
  document.querySelectorAll('.signal-canvas').forEach(canvas=>{
   const pink=canvas.dataset.surface==='pink',frequency=canvas.dataset.kind==='frequency';
+  const positions=new Float32Array(points.length*2);let previousWidth=0,previousHeight=0;
   scene(canvas,(ctx,w,h,t,p)=>{
    ctx.fillStyle=pink?'#EE2243':'#171717';ctx.fillRect(0,0,w,h);
    const size=Math.min(w*.84,h*.86),cx=w*.5,cy=h*.5;
-   const px=(p.x-.5)*w,py=(p.y-.5)*h;
+   const px=(p.x-.5)*w,py=(p.y-.5)*h,reset=w!==previousWidth||h!==previousHeight,follow=1-Math.exp(-p.delta*9),radius=size*.23,radiusSquared=radius*radius;previousWidth=w;previousHeight=h;const strokes=p.trail.map(s=>({...s,x:(s.x-.5)*w,y:(s.y-.5)*h}));
    ctx.lineCap='butt';
    for(let band=0;band<4;band++){
     ctx.strokeStyle=pink?['#F5EFEA','#f5efea99','#17171788','#F5EFEA'][band]:['#EE2243','#F5EFEA','#EE2243','#ee2243cc'][band];
@@ -47,12 +48,12 @@ window.KiyotoMotion={install(isPaused){
     for(let i=band;i<points.length;i+=4){
      const [sx,sy]=points[i];let x=(sx-125)/250*size,y=(sy-137.5)/275*size;
      const flow=Math.sin(y/size*11+t*.7)*3+Math.sin(i*.17+t*.4)*1.2;
-     const distance=Math.hypot(x-px,y-py),force=p.active?clamp(1-distance/(size*.45)):0;
-     let swipeX=0,swipeY=0;for(const sample of p.trail){const dx=x-(sample.x-.5)*w,dy=y-(sample.y-.5)*h,d=Math.hypot(dx,dy),brush=clamp(1-d/(size*.23))*sample.life;swipeX+=(dx/(d||1)+sample.vx*.8)*brush*size*.12;swipeY+=(dy/(d||1)+sample.vy*.8)*brush*size*.12;}
+     const force=p.strength>.001?p.strength*clamp(1-Math.hypot(x-px,y-py)/(size*.45)):0;
+     let swipeX=0,swipeY=0;for(const sample of strokes){const dx=x-sample.x,dy=y-sample.y,squared=dx*dx+dy*dy;if(squared>=radiusSquared)continue;const d=Math.sqrt(squared),brush=(1-d/radius)*sample.life;swipeX+=(dx/(d||1)+sample.vx*.8)*brush*size*.12;swipeY+=(dy/(d||1)+sample.vy*.8)*brush*size*.12;}
      x+=Math.max(-size*.26,Math.min(size*.26,swipeX));y+=Math.max(-size*.26,Math.min(size*.26,swipeY));
      const scatter=p.pulse*(30+(i%29)*3);x+=flow+Math.sin(i*.81)*scatter+(x-px)*force*.12;y+=Math.cos(i*.21+t*.55)*1.6+Math.cos(i*.67)*scatter+(y-py)*force*.12;
      if(frequency)x+=Math.sin(y/size*8+t*.4)*size*.025;
-     const length=2+(i%4)*.7;ctx.moveTo(cx+x,cy+y);ctx.lineTo(cx+x+length,cy+y-.5);
+     const offset=i*2;if(reset){positions[offset]=x;positions[offset+1]=y;}else{positions[offset]+=(x-positions[offset])*follow;positions[offset+1]+=(y-positions[offset+1])*follow;}const length=2+(i%4)*.7;ctx.moveTo(cx+positions[offset],cy+positions[offset+1]);ctx.lineTo(cx+positions[offset]+length,cy+positions[offset+1]-.5);
     }ctx.stroke();
    }
   });
