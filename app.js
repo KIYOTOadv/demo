@@ -5,7 +5,7 @@
  const media=matchMedia('(prefers-reduced-motion: reduce)');
  let lang=['en','fa'].includes(read('kiyoto-language'))?read('kiyoto-language'):'en';
  let paused=media.matches||read('kiyoto-v2-motion')==='paused',cleanup=()=>{},entered=false;
- try{entered=sessionStorage.getItem('kiyoto-entered')==='yes';}catch{}
+ try{entered=sessionStorage.getItem('kiyoto-entered')==='yes'&&performance.getEntriesByType('navigation')[0]?.type!=='reload';}catch{}
  const tr=(en,fa)=>lang==='fa'?fa:en;
  const files=['index.html','about.html','process.html'];
  const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

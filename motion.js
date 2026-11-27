@@ -72,15 +72,20 @@ window.KiyotoMotion={install(isPaused){
   const origin=logo.offsetHeight*.4,baseTop=logo.offsetTop+(logo.offsetHeight-maskHeight)/2;
   return {scale,x:0,y:top-(logo.offsetTop+origin+(baseTop-logo.offsetTop-origin)*scale)};
  };
+ function animateGate(time=0){
+  gateTween?.kill();const position=gatePosition();gs.set('.gate-logo',{scale:1,x:0,y:0});gs.set('.gate-options',{autoAlpha:0,y:15});
+  gateTween=gs.timeline().to('.gate-logo',{...position,duration:1.35,ease:'power3.inOut'},.85).to('.gate-options',{autoAlpha:1,y:0,duration:.65,ease:'power2.out'},2.05);
+  if(time>0)gateTween.time(time,true);
+ }
  function showGate(){
   root.classList.toggle('gate-open',gateOpen());if(!gateOpen()){intro?.play();return;}
   if(!gs){document.querySelector('.gate-logo').style.transform='translateY(-18vh) scale(.47)';return;}
   gateTween?.kill();const position=gatePosition();
   if(dialog.dataset.reopened||isPaused()){gs.set('.gate-logo',position);gs.set('.gate-options',{autoAlpha:1,y:0});}
-  else{gs.set('.gate-logo',{scale:1,x:0,y:0});gs.set('.gate-options',{autoAlpha:0,y:15});gateTween=gs.timeline().to('.gate-logo',{...position,duration:1.35,ease:'power3.inOut'},.85).to('.gate-options',{autoAlpha:1,y:0,duration:.65,ease:'power2.out'},2.05);}
+  else animateGate();
  }
  const gateObserver=new MutationObserver(()=>{showGate();loops.forEach(f=>f());});gateObserver.observe(dialog,{attributes:true,attributeFilter:['open']});
- const gateResize=()=>{if(dialog.open&&gs){gateTween?.kill();gs.set('.gate-logo',gatePosition());gs.set('.gate-options',{autoAlpha:1,y:0});}};
+ const gateResize=()=>{if(dialog.open&&gs){if(gateTween&&gateTween.progress()<1&&!isPaused())animateGate(gateTween.time());else{gateTween?.kill();gs.set('.gate-logo',gatePosition());gs.set('.gate-options',{autoAlpha:1,y:0});}}};
  addEventListener('resize',gateResize);document.addEventListener('kiyoto:gate',showGate);
  clean.push(()=>{gateObserver.disconnect();gateTween?.kill();removeEventListener('resize',gateResize);document.removeEventListener('kiyoto:gate',showGate);root.classList.remove('gate-open');});
  if(gs){
